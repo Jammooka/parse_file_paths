@@ -2,7 +2,7 @@
 
 $plugin_info = array(
 	'pi_name' => 'Parse File Paths',
-	'pi_version' => '1.0.0',
+	'pi_version' => '1.0.1',
 	'pi_author' => 'Rob Sanchez',
 	'pi_author_url' => 'http://github.com/rsanchez',
 	'pi_description' => 'Parses {filedir_X} variables.',
@@ -21,7 +21,16 @@ class Parse_file_paths
 		
 		$this->EE->typography->parse_images = TRUE;
 		
-		$this->return_data = $this->EE->typography->parse_file_paths($this->EE->TMPL->tagdata);
+		$file_path = $this->EE->typography->parse_file_paths($this->EE->TMPL->tagdata);
+		
+		if ($this->EE->TMPL->fetch_param('manipulation'))
+		{
+			$segments = array_filter(explode('/', $file_path));
+			$segments[count($segments)] = '_' . $this->EE->TMPL->fetch_param('manipulation') . '/' . $segments[count($segments)];
+			$file_path = '/' . implode('/', $segments);
+		}
+		
+		$this->return_data = $file_path;
 	}
 	
 	public static function usage()
@@ -29,7 +38,7 @@ class Parse_file_paths
 		ob_start(); 
 ?>
 {exp:query sql="SELECT field_id_1 AS file FROM exp_channel_data"}
-{exp:parse_file_paths}
+{exp:parse_file_paths manipulation="thumbnail"}
 	{file}
 {/exp:parse_file_paths}
 {/exp:query}
